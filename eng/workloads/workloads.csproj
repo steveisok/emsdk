@@ -3,7 +3,8 @@
 
   <PropertyGroup>
     <MicrosoftDotNetBuildTasksInstallersTaskTargetFramework>netcoreapp3.1</MicrosoftDotNetBuildTasksInstallersTaskTargetFramework>
-    <MicrosoftDotNetBuildTasksInstallersTaskAssembly>$(NuGetPackageRoot)microsoft.dotnet.build.tasks.installers\$(MicrosoftDotNetBuildTasksInstallersPackageVersion)\tools\$(MicrosoftDotNetBuildTasksInstallersTaskTargetFramework)\Microsoft.DotNet.Build.Tasks.Installers.dll</MicrosoftDotNetBuildTasksInstallersTaskAssembly>
+    <MicrosoftDotNetBuildTasksInstallersPath>$(NuGetPackageRoot)microsoft.dotnet.build.tasks.installers\$(MicrosoftDotNetBuildTasksInstallersVersion)</MicrosoftDotNetBuildTasksInstallersPath>
+    <MicrosoftDotNetBuildTasksInstallersTaskAssembly>$(MicrosoftDotNetBuildTasksInstallersPath)\tools\$(MicrosoftDotNetBuildTasksInstallersTaskTargetFramework)\Microsoft.DotNet.Build.Tasks.Installers.dll</MicrosoftDotNetBuildTasksInstallersTaskAssembly>
   </PropertyGroup>
 
   <UsingTask AssemblyFile="$(PkgMicrosoft_DotNet_Build_Tasks_Workloads)\tools\net472\Microsoft.DotNet.Build.Tasks.Workloads.dll" TaskName="GenerateManifestMsi" />
@@ -48,6 +49,7 @@
   </ItemGroup>
 
   <Import Sdk="Microsoft.NET.Sdk" Project="Sdk.targets" />
+  <Import Project="$(MicrosoftDotNetBuildTasksInstallersPath)\build\wix\wix.targets" />
 
   <Target Name="Build" DependsOnTargets="_GenerateMsiVersionString">
     <ItemGroup>
