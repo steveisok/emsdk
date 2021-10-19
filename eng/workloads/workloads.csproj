@@ -50,7 +50,7 @@
 
   <Import Sdk="Microsoft.NET.Sdk" Project="Sdk.targets" />
 
-  <Target Name="Build" DependsOnTargets="_GenerateMsiVersionString">
+  <Target Name="Build" DependsOnTargets="_GetVersionProps;_GenerateMsiVersionString">
     <ItemGroup>
       <!-- Overrides for Visual Studio setup generation. If the workload definition IDs change,
            these must be updated. -->
@@ -77,14 +77,6 @@
     <ItemGroup>
       <ManifestPackages Include="$(PackageSource)Microsoft.NET.Workload.Emscripten.Manifest*.nupkg" />
     </ItemGroup>
-
-    <GenerateMsiVersion
-        Major="$([System.Version]::Parse('$(AssemblyVersion)').Major)"
-        Minor="$([System.Version]::Parse('$(AssemblyVersion)').Minor)"
-        Patch="$([System.Version]::Parse('$(AssemblyVersion)').Build)"
-        BuildNumber="$([System.Version]::Parse('$(AssemblyVersion)').Revision)" >
-      <Output TaskParameter="MsiVersion" PropertyName="MsiVersion" />
-    </GenerateMsiVersion>
 
     <GenerateManifestMsi
         IntermediateBaseOutputPath="$(IntermediateOutputPath)"
@@ -166,6 +158,15 @@
     <MSBuild Projects="@(VisualStudioManifestProjects)" BuildInParallel="true" Properties="SwixBuildTargets=$(SwixBuildTargets);ManifestOutputPath=$(VersionedVisualStudioSetupInsertionPath);OutputPath=$(VersionedVisualStudioSetupInsertionPath)" />
   </Target>
 
+  <Target Name="_GetVersionProps">
+    <PropertyGroup>
+      <_MajorVersion>$([System.Version]::Parse('$(AssemblyVersion)').Major)</_MajorVersion>
+      <_MinorVersion>$([System.Version]::Parse('$(AssemblyVersion)').Minor)</_MinorVersion>
+      <_PatchVersion>$([System.Version]::Parse('$(AssemblyVersion)').Build)</_PatchVersion>
+      <_BuildNumber>$([System.Version]::Parse('$(AssemblyVersion)').Revision)</_BuildNumber>
+    </PropertyGroup>
+  </Target>
+
   <Target Name="_GenerateMsiVersionString">
     <PropertyGroup>
       <VersionPadding Condition="'$(VersionPadding)'==''">5</VersionPadding>
@@ -183,12 +184,12 @@
     </GenerateCurrentVersion>
 
     <GenerateMsiVersion
-      Major="$(MajorVersion)"
-      Minor="$(MinorVersion)"
-      Patch="$(PatchVersion)"
+      Major="$(_MajorVersion)"
+      Minor="$(_MinorVersion)"
+      Patch="$(_PatchVersion)"
       BuildNumberMajor="$(BuildNumberMajor)"
       BuildNumberMinor="$(BuildNumberMinor)">
-      <Output TaskParameter="MsiVersion" PropertyName="MsiVersionString" />
+      <Output TaskParameter="MsiVersion" PropertyName="MsiVersion" />
     </GenerateMsiVersion>
   </Target>
 </Project>
