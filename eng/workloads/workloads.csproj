@@ -3,7 +3,7 @@
 
   <PropertyGroup>
     <MicrosoftDotNetBuildTasksInstallersTaskTargetFramework>netcoreapp3.1</MicrosoftDotNetBuildTasksInstallersTaskTargetFramework>
-    <MicrosoftDotNetBuildTasksInstallersPath>$(NuGetPackageRoot)microsoft.dotnet.build.tasks.installers\$(MicrosoftDotNetBuildTasksInstallersVersion)</MicrosoftDotNetBuildTasksInstallersPath>
+    <MicrosoftDotNetBuildTasksInstallersPath>$(NuGetPackageRoot)microsoft.dotnet.build.tasks.installers\$(MicrosoftDotNetBuildTasksInstallersPackageVersion)</MicrosoftDotNetBuildTasksInstallersPath>
     <MicrosoftDotNetBuildTasksInstallersTaskAssembly>$(MicrosoftDotNetBuildTasksInstallersPath)\tools\$(MicrosoftDotNetBuildTasksInstallersTaskTargetFramework)\Microsoft.DotNet.Build.Tasks.Installers.dll</MicrosoftDotNetBuildTasksInstallersTaskAssembly>
   </PropertyGroup>
 
@@ -49,7 +49,6 @@
   </ItemGroup>
 
   <Import Sdk="Microsoft.NET.Sdk" Project="Sdk.targets" />
-  <Import Project="$(MicrosoftDotNetBuildTasksInstallersPath)\build\wix\wix.targets" />
 
   <Target Name="Build" DependsOnTargets="_GenerateMsiVersionString">
     <ItemGroup>
@@ -165,5 +164,31 @@
     </ItemGroup>
 
     <MSBuild Projects="@(VisualStudioManifestProjects)" BuildInParallel="true" Properties="SwixBuildTargets=$(SwixBuildTargets);ManifestOutputPath=$(VersionedVisualStudioSetupInsertionPath);OutputPath=$(VersionedVisualStudioSetupInsertionPath)" />
+  </Target>
+
+  <Target Name="_GenerateMsiVersionString">
+    <PropertyGroup>
+      <VersionPadding Condition="'$(VersionPadding)'==''">5</VersionPadding>
+      <!-- Using the following default comparison date will produce versions that align with our internal build system. -->
+      <VersionComparisonDate Condition="'$(VersionComparisonDate)'==''">1996-04-01</VersionComparisonDate>
+    </PropertyGroup>
+
+    <GenerateCurrentVersion
+      SeedDate="$([System.DateTime]::Now.ToString(yyyy-MM-dd))"
+      OfficialBuildId="$(OfficialBuildId)"
+      ComparisonDate="$(VersionComparisonDate)"
+      Padding="$(VersionPadding)">
+      <Output PropertyName="BuildNumberMajor" TaskParameter="GeneratedVersion" />
+      <Output PropertyName="BuildNumberMinor" TaskParameter="GeneratedRevision" />
+    </GenerateCurrentVersion>
+
+    <GenerateMsiVersion
+      Major="$(MajorVersion)"
+      Minor="$(MinorVersion)"
+      Patch="$(PatchVersion)"
+      BuildNumberMajor="$(BuildNumberMajor)"
+      BuildNumberMinor="$(BuildNumberMinor)">
+      <Output TaskParameter="MsiVersion" PropertyName="MsiVersionString" />
+    </GenerateMsiVersion>
   </Target>
 </Project>
