@@ -148,6 +148,9 @@
     </ItemGroup>
 
     <MSBuild Projects="@(MsiPackageProjects)" Properties="OutputPath=$(ArtifactsShippingPackagesDir);IncludeSymbols=false" Targets="restore;pack" />
+  
+    <Delete Condition="'$(AssetManifestOS)' == 'win' and '$(TargetArchitecture)' == 'arm64'" 
+            Files="$(ArtifactsShippingPackagesDir)\Microsoft.NET.Workload.Emscripten.Current.Manifest*.nupkg" />
   </Target>
 
   <!-- Target to create a single wixpack for signing -->
