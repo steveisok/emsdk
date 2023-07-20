@@ -205,9 +205,9 @@ stages:
               SkipPublishWorkloads: false
         steps:
         - task: DownloadPipelineArtifact@2
-            inputs:
-              artifact: Packages_Windows
-              path: 'artifacts/packages'
+          inputs:
+            artifact: Packages_Windows
+            path: 'artifacts/packages'
         - script: |
             .\build.cmd $(archflag) -restore -build -pack -ci -configuration $(_BuildConfig) -sign -publish /p:SkipBuild=true /p:PackageRID=$(assetManifestOS)-$(assetManifestPlatform) /p:AssetManifestOS=$(assetManifestOS) /p:PlatformName=$(assetManifestPlatform) /p:workloadPackagesPath=$(Build.SourcesDirectory)\artifacts\packages\$(_BuildConfig)\Shipping $(_InternalBuildArgs)
           displayName: Build and Publish
