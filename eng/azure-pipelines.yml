@@ -164,11 +164,6 @@ stages:
             demands: ImageOverride -equals windows.vs2022.amd64
         strategy:
           matrix:
-            x64:
-              assetManifestOS: win
-              assetManifestPlatform: x64
-              archflag: -arch x64
-              SkipPublishWorkloads: true
             arm64:
               assetManifestOS: win
               assetManifestPlatform: arm64
