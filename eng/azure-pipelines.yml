@@ -235,16 +235,14 @@ stages:
               Shipping/**/*
               NonShipping/**/*
             TargetFolder: '$(Build.StagingDirectory)/IntermediateArtifacts/windows'
-            CleanTargetFolder: true
+            CleanTargetFolder: false
+            Overwrite: true
         - task: PublishBuildArtifacts@1
           displayName: Publish intermediate artifacts
           inputs:
             pathToPublish: '$(Build.StagingDirectory)/IntermediateArtifacts'
             artifactName: IntermediateArtifacts
             artifactType: container
-        - script: |
-            rmdir /s /q binaryen node python llvm emscripten
-          displayName: Remove temporary artifacts
         # Upload packages wrapping msis
         - task: CopyFiles@2
           displayName: Prepare job-specific intermediate artifacts subdirectory
