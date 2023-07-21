@@ -178,8 +178,21 @@ stages:
         - script: |
             .\build.cmd $(archflag) -restore -build -pack -ci -configuration $(_BuildConfig) -sign -publish /p:PackageRID=$(assetManifestOS)-$(assetManifestPlatform) /p:AssetManifestOS=$(assetManifestOS) /p:PlatformName=$(assetManifestPlatform) /p:workloadPackagesPath=$(Build.SourcesDirectory)\artifacts\packages\$(_BuildConfig)\Shipping $(_InternalBuildArgs)
           displayName: Build and Publish
-        - publish: artifacts/packages
-          artifact: Packages_Windows
+        - task: CopyFiles@2
+          displayName: Prepare job-specific intermediate artifacts subdirectory
+          inputs:
+            SourceFolder: '$(Build.SourcesDirectory)/artifacts/packages/$(_BuildConfig)'
+            Contents: |
+              Shipping/**/*
+              NonShipping/**/*
+            TargetFolder: '$(Build.StagingDirectory)/IntermediateArtifacts/windows'
+            CleanTargetFolder: true
+        - task: PublishBuildArtifacts@1
+          displayName: Publish intermediate artifacts
+          inputs:
+            pathToPublish: '$(Build.StagingDirectory)/IntermediateArtifacts'
+            artifactName: IntermediateArtifacts
+            artifactType: container
         - script: |
             rmdir /s /q binaryen node python llvm emscripten
           displayName: Remove temporary artifacts
@@ -206,13 +219,28 @@ stages:
         steps:
         - task: DownloadPipelineArtifact@2
           inputs:
-            artifact: Packages_Windows
+            artifact: IntermediateArtifacts
             path: 'artifacts/packages'
+            patterns: |
+              IntermediateArtifacts/windows/*.*
         - script: |
             .\build.cmd $(archflag) -restore -build -pack -ci -configuration $(_BuildConfig) -sign -publish /p:SkipBuild=true /p:PackageRID=$(assetManifestOS)-$(assetManifestPlatform) /p:AssetManifestOS=$(assetManifestOS) /p:PlatformName=$(assetManifestPlatform) /p:workloadPackagesPath=$(Build.SourcesDirectory)\artifacts\packages\$(_BuildConfig)\Shipping $(_InternalBuildArgs)
           displayName: Build and Publish
-        - publish: artifacts/packages
-          artifact: Packages_Windows
+        - task: CopyFiles@2
+          displayName: Prepare job-specific intermediate artifacts subdirectory
+          inputs:
+            SourceFolder: '$(Build.SourcesDirectory)/artifacts/packages/$(_BuildConfig)'
+            Contents: |
+              Shipping/**/*
+              NonShipping/**/*
+            TargetFolder: '$(Build.StagingDirectory)/IntermediateArtifacts/windows'
+            CleanTargetFolder: true
+        - task: PublishBuildArtifacts@1
+          displayName: Publish intermediate artifacts
+          inputs:
+            pathToPublish: '$(Build.StagingDirectory)/IntermediateArtifacts'
+            artifactName: IntermediateArtifacts
+            artifactType: container
         - script: |
             rmdir /s /q binaryen node python llvm emscripten
           displayName: Remove temporary artifacts
