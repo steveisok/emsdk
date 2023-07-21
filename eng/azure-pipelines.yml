@@ -186,7 +186,8 @@ stages:
               Shipping/**/*
               NonShipping/**/*
             TargetFolder: '$(Build.StagingDirectory)/IntermediateArtifacts/windows'
-            CleanTargetFolder: true
+            CleanTargetFolder: false
+            Overwrite: true
         - task: PublishBuildArtifacts@1
           displayName: Publish intermediate artifacts
           inputs:
