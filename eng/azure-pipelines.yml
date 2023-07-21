@@ -176,7 +176,7 @@ stages:
               SkipPublishWorkloads: true
         steps:
         - script: |
-            .\build.cmd $(archflag) -restore -build -pack -ci -configuration $(_BuildConfig) -sign -publish /p:PackageRID=$(assetManifestOS)-$(assetManifestPlatform) /p:AssetManifestOS=$(assetManifestOS) /p:PlatformName=$(assetManifestPlatform) /p:workloadPackagesPath=$(Build.SourcesDirectory)\artifacts\packages\$(_BuildConfig)\Shipping $(_InternalBuildArgs)
+            .\build.cmd $(archflag) -restore -build -pack -ci -configuration $(_BuildConfig) -sign -publish /p:SkipWorkloads=true /p:PackageRID=$(assetManifestOS)-$(assetManifestPlatform) /p:AssetManifestOS=$(assetManifestOS) /p:PlatformName=$(assetManifestPlatform) /p:workloadPackagesPath=$(Build.SourcesDirectory)\artifacts\packages\$(_BuildConfig)\Shipping $(_InternalBuildArgs)
           displayName: Build and Publish
         - task: CopyFiles@2
           displayName: Prepare job-specific intermediate artifacts subdirectory
@@ -225,7 +225,7 @@ stages:
             patterns: |
               IntermediateArtifacts/windows/*.*
         - script: |
-            .\build.cmd $(archflag) -restore -build -pack -ci -configuration $(_BuildConfig) -sign -publish /p:SkipBuild=true /p:PackageRID=$(assetManifestOS)-$(assetManifestPlatform) /p:AssetManifestOS=$(assetManifestOS) /p:PlatformName=$(assetManifestPlatform) /p:workloadPackagesPath=$(Build.SourcesDirectory)\artifacts\packages\$(_BuildConfig)\Shipping $(_InternalBuildArgs)
+            .\build.cmd $(archflag) -restore -build -pack -ci -configuration $(_BuildConfig) -sign -publish /p:SkipBuild=true /p:PackageRID=$(assetManifestOS)-$(assetManifestPlatform) /p:AssetManifestOS=$(assetManifestOS) /p:PlatformName=$(assetManifestPlatform) /p:workloadPackagesPath=$(Build.SourcesDirectory)\artifacts\packages\windows\Shipping $(_InternalBuildArgs)
           displayName: Build and Publish
         - task: CopyFiles@2
           displayName: Prepare job-specific intermediate artifacts subdirectory
