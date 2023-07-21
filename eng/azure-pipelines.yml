@@ -223,7 +223,7 @@ stages:
             artifact: IntermediateArtifacts
             path: 'artifacts/packages'
             patterns: |
-              IntermediateArtifacts/windows/*.*
+              IntermediateArtifacts/windows/Shipping/*.*
         - script: |
             .\build.cmd $(archflag) -restore -build -pack -ci -configuration $(_BuildConfig) -sign -publish /p:SkipBuild=true /p:PackageRID=$(assetManifestOS)-$(assetManifestPlatform) /p:AssetManifestOS=$(assetManifestOS) /p:PlatformName=$(assetManifestPlatform) /p:workloadPackagesPath=$(Build.SourcesDirectory)\artifacts\packages\windows\Shipping $(_InternalBuildArgs)
           displayName: Build and Publish
@@ -249,7 +249,7 @@ stages:
         - task: CopyFiles@2
           displayName: Prepare job-specific intermediate artifacts subdirectory
           inputs:
-            SourceFolder: '$(Build.SourcesDirectory)/artifacts/packages/$(_BuildConfig)'
+            SourceFolder: '$(Build.SourcesDirectory)/artifacts/packages/windows'
             Contents: |
               Shipping/**/*
               NonShipping/**/*
