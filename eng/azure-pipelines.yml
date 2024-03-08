@@ -67,8 +67,8 @@ extends:
                 os: macOS
               steps:
               - bash: |
-                  ./build.sh --arch x64 --restore --build --pack --ci --configuration $(_BuildConfig) /p:PackageRID=osx-x64 /p:AssetManifestOS=osx /p:PlatformName=x64 $(_InternalBuildArgs) $(_NonWindowsInternalPublishArg)
-                  ./eng/common/build.ps1 -ci -configuration $(_BuildConfig) -restore -sign /p:PackageRID=osx-x64 /p:AssetManifestOS=osx /p:PlatformName=x64 $(_InternalBuildArgs)
+                  ./build.sh --arch x64 --restore --build --pack --ci --configuration $(_BuildConfig) /p:PackageRID=osx-x64 /p:AssetManifestOS=osx /p:PlatformName=x64 /p:Publish=false $(_InternalBuildArgs)
+                  ./eng/common/build.ps1 -ci -configuration $(_BuildConfig) -restore -sign /p:PackageRID=osx-x64 /p:AssetManifestOS=osx /p:PlatformName=x64 /p:Publish=false $(_InternalBuildArgs)
                 displayName: Build
               - task: 1ES.PublishPipelineArtifact@1
                 inputs:
@@ -89,8 +89,8 @@ extends:
                 os: macOS
               steps:
               - bash: |
-                  ./build.sh --arch arm64 --restore --build --pack --ci --configuration $(_BuildConfig) /p:PackageRID=osx-arm64 /p:AssetManifestOS=osx /p:PlatformName=arm64 $(_InternalBuildArgs) $(_NonWindowsInternalPublishArg)
-                  ./eng/common/build.ps1 -ci -configuration $(_BuildConfig) -restore -sign /p:PackageRID=osx-arm64 /p:AssetManifestOS=osx /p:PlatformName=arm64 $(_InternalBuildArgs)
+                  ./build.sh --arch arm64 --restore --build --pack --ci --configuration $(_BuildConfig) /p:PackageRID=osx-arm64 /p:AssetManifestOS=osx /p:PlatformName=arm64 /p:Publish=false $(_InternalBuildArgs)
+                  ./eng/common/build.ps1 -ci -configuration $(_BuildConfig) -restore -sign /p:PackageRID=osx-arm64 /p:AssetManifestOS=osx /p:PlatformName=arm64 /p:Publish=false $(_InternalBuildArgs)
                 displayName: Build
               - task: 1ES.PublishPipelineArtifact@1
                 inputs:
@@ -107,13 +107,13 @@ extends:
               displayName: Linux_x64
               timeoutInMinutes: 120
               pool:
-                name: Azure Pipelines
+                name: $(DncEngInternalBuildPool)
                 image: $(LinuxImage)
                 os: linux
               steps:
               - bash: |
-                  ./build.sh --arch x64 --restore --build --pack --ci --configuration $(_BuildConfig) /p:PackageRID=linux-x64 /p:AssetManifestOS=linux /p:PlatformName=x64 $(_InternalBuildArgs) $(_NonWindowsInternalPublishArg)
-                  ./eng/common/build.ps1 -ci -configuration $(_BuildConfig) -restore -sign /p:PackageRID=linux-x64 /p:AssetManifestOS=linux /p:PlatformName=x64 $(_InternalBuildArgs)
+                  ./build.sh --arch x64 --restore --build --pack --ci --configuration $(_BuildConfig) /p:PackageRID=linux-x64 /p:AssetManifestOS=linux /p:PlatformName=x64 /p:Publish=false $(_InternalBuildArgs)
+                  ./eng/common/build.ps1 -ci -configuration $(_BuildConfig) -restore -sign /p:PackageRID=linux-x64 /p:AssetManifestOS=linux /p:PlatformName=x64 /p:Publish=false $(_InternalBuildArgs)
                 displayName: Build
               - task: 1ES.PublishPipelineArtifact@1
                 inputs:
