@@ -58,31 +58,42 @@ extends:
             jobs:
 
             ############ macOS BUILD ############
-            - job: Build_macOS
-              displayName: macOS
+            - job: Build_macOS_x64
+              displayName: macOS_x64
               timeoutInMinutes: 120
               pool:
                 name: Azure Pipelines
                 vmImage: $(MacImage)
                 os: macOS
-              strategy:
-                matrix:
-                  x64:
-                    assetManifestOS: osx
-                    assetManifestPlatform: x64
-                    archflag: --arch x64
-                  arm64:
-                    assetManifestOS: osx
-                    assetManifestPlatform: arm64
-                    archflag: --arch arm64
               steps:
               - bash: |
-                  ./build.sh $(archflag) --restore --build --pack --ci --configuration $(_BuildConfig) /p:PackageRID=$(assetManifestOS)-$(assetManifestPlatform) /p:AssetManifestOS=$(assetManifestOS) /p:PlatformName=$(assetManifestPlatform) $(_InternalBuildArgs) $(_NonWindowsInternalPublishArg)
+                  ./build.sh --arch x64 --restore --build --pack --ci --configuration $(_BuildConfig) /p:PackageRID=osx-x64 /p:AssetManifestOS=osx /p:PlatformName=x64 $(_InternalBuildArgs) $(_NonWindowsInternalPublishArg)
                 displayName: Build
               - task: 1ES.PublishPipelineArtifact@1
                 inputs:
                   path: $(System.DefaultWorkingDirectory)/artifacts/packages
-                  artifact: Packages_macOS_$(assetManifestPlatform)
+                  artifact: Packages_macOS_x64
+              - bash: |
+                  rm -rf binaryen node python llvm emscripten
+                displayName: Remove temporary artifacts
+              - powershell: $(CheckNuGetSizesScript)
+                displayName: Check NuGet sizes
+
+            - job: Build_macOS_arm64
+              displayName: macOS_arm64
+              timeoutInMinutes: 120
+              pool:
+                name: Azure Pipelines
+                vmImage: $(MacImage)
+                os: macOS
+              steps:
+              - bash: |
+                  ./build.sh --arch arm64 --restore --build --pack --ci --configuration $(_BuildConfig) /p:PackageRID=osx-arm64 /p:AssetManifestOS=osx /p:PlatformName=arm64 $(_InternalBuildArgs) $(_NonWindowsInternalPublishArg)
+                displayName: Build
+              - task: 1ES.PublishPipelineArtifact@1
+                inputs:
+                  path: $(System.DefaultWorkingDirectory)/artifacts/packages
+                  artifact: Packages_macOS_arm64
               - bash: |
                   rm -rf binaryen node python llvm emscripten
                 displayName: Remove temporary artifacts
@@ -98,22 +109,14 @@ extends:
                 pool:
                   name: $(DncEngInternalBuildPool)
                   demands: ImageOverride -equals windows.vs2022.amd64
-                strategy:
-                  matrix:
-                    x64:
-                      assetManifestOS: osx
-                      assetManifestPlatform: x64
-                    arm64:
-                      assetManifestOS: osx
-                      assetManifestPlatform: arm64
                 steps:
                 - task: DownloadPipelineArtifact@2
                   inputs:
-                    artifact: Packages_macOS_$(assetManifestPlatform)
+                    artifact: Packages_macOS_x64
                     path: 'artifacts/packages'
 
                 - powershell: |
-                    ./eng/common/build.ps1 -ci -configuration $(_BuildConfig) -restore -sign -publish /p:PackageRID=$(assetManifestOS)-$(assetManifestPlatform) /p:AssetManifestOS=$(assetManifestOS) /p:PlatformName=$(assetManifestPlatform) $(_InternalBuildArgs)
+                    ./eng/common/build.ps1 -ci -configuration $(_BuildConfig) -restore -sign -publish /p:PackageRID=osx-x64 /p:AssetManifestOS=osx /p:PlatformName=x64 $(_InternalBuildArgs)
                   displayName: Sign and Publish
             
             ############ Linux BUILD ############
