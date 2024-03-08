@@ -303,12 +303,3 @@ extends:
                 condition: ne(variables['SkipPublishWorkloads'], 'true')
               - powershell: $(CheckNuGetSizesScript)
                 displayName: Check NuGet sizes
-
-    #- ${{ if and(ne(variables['System.TeamProject'], 'public'), ne(variables['Build.Reason'], 'PullRequest')) }}:
-    - template: /eng/common/templates-official/post-build/post-build.yml@self
-      parameters:
-        publishingInfraVersion: 3
-        enableSourceLinkValidation: false
-        enableSigningValidation: false
-        enableSymbolValidation: false
-        enableNugetValidation: true
