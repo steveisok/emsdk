@@ -132,7 +132,7 @@ extends:
                 os: windows
               steps:
               - script: |
-                  .\build.cmd $(archflag) -restore -build -pack -ci -configuration $(_BuildConfig) /p:SkipWorkloads=true /p:PackageRID=win-arm64 /p:AssetManifestOS=win /p:PlatformName=arm64 /p:Publish=false /p:Sign=false /p:workloadPackagesPath=$(Build.SourcesDirectory)\artifacts\packages\$(_BuildConfig)\Shipping $(_InternalBuildArgs)
+                  .\build.cmd -arch arm64 -restore -build -sign -pack -ci -configuration $(_BuildConfig) /p:SkipWorkloads=true /p:PackageRID=win-arm64 /p:AssetManifestOS=win /p:PlatformName=arm64 /p:Publish=false /p:workloadPackagesPath=$(Build.SourcesDirectory)\artifacts\packages\$(_BuildConfig)\Shipping $(_InternalBuildArgs)
                 displayName: Build
               - task: 1ES.PublishPipelineArtifact@1
                 displayName: Publish intermediate artifacts
@@ -153,7 +153,7 @@ extends:
                 os: windows
               steps:
               - script: |
-                  .\build.cmd $(archflag) -restore -build -pack -ci -configuration $(_BuildConfig) /p:Sign=false /p:Publish=false /p:SkipWorkloads=true /p:PackageRID=win-x64 /p:AssetManifestOS=win /p:PlatformName=x64 /p:workloadPackagesPath=$(Build.SourcesDirectory)\artifacts\packages\$(_BuildConfig)\Shipping $(_InternalBuildArgs)
+                  .\build.cmd -arch x64 -restore -build -pack -sign -ci -configuration $(_BuildConfig) /p:Publish=false /p:SkipWorkloads=true /p:PackageRID=win-x64 /p:AssetManifestOS=win /p:PlatformName=x64 /p:workloadPackagesPath=$(Build.SourcesDirectory)\artifacts\packages\$(_BuildConfig)\Shipping $(_InternalBuildArgs)
                 displayName: Build
               - task: 1ES.PublishPipelineArtifact@1
                 displayName: Publish intermediate artifacts
