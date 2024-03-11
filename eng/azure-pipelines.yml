@@ -72,7 +72,7 @@ extends:
               - task: 1ES.PublishPipelineArtifact@1
                 inputs:
                   path: $(System.DefaultWorkingDirectory)/artifacts/packages
-                  artifact: PackageArtifacts
+                  artifact: Packages_macOS_x64
               - bash: |
                   rm -rf binaryen node python llvm emscripten
                 displayName: Remove temporary artifacts
@@ -93,7 +93,7 @@ extends:
               - task: 1ES.PublishPipelineArtifact@1
                 inputs:
                   path: $(System.DefaultWorkingDirectory)/artifacts/packages
-                  artifact: PackageArtifacts
+                  artifact: Packages_macOS_arm64
               - bash: |
                   rm -rf binaryen node python llvm emscripten
                 displayName: Remove temporary artifacts
@@ -115,7 +115,7 @@ extends:
               - task: 1ES.PublishPipelineArtifact@1
                 inputs:
                   path: $(System.DefaultWorkingDirectory)/artifacts/packages
-                  artifact: PackageArtifacts
+                  artifact: Packages_linux_x64
               - bash: |
                   rm -rf binaryen node python llvm emscripten
                 displayName: Remove temporary artifacts
@@ -138,7 +138,7 @@ extends:
                 displayName: Publish intermediate artifacts
                 inputs:
                   path: $(System.DefaultWorkingDirectory)/artifacts/packages
-                  artifact: PackageArtifacts
+                  artifact: Packages_win_arm64
               - script: |
                   rmdir /s /q binaryen node python llvm emscripten
                 displayName: Remove temporary artifacts
@@ -159,7 +159,7 @@ extends:
                 displayName: Publish intermediate artifacts
                 inputs:
                   path: $(System.DefaultWorkingDirectory)/artifacts/packages
-                  artifact: PackageArtifacts
+                  artifact: Packages_win_x64
               - script: |
                   rmdir /s /q binaryen node python llvm emscripten
                 displayName: Remove temporary artifacts
