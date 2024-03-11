@@ -68,12 +68,11 @@ extends:
               steps:
               - bash: |
                   ./build.sh --arch x64 --restore --build --pack --ci --configuration $(_BuildConfig) /p:PackageRID=osx-x64 /p:AssetManifestOS=osx /p:PlatformName=x64 /p:Publish=false $(_InternalBuildArgs)
-                  pwsh ./eng/common/build.ps1 -ci -configuration $(_BuildConfig) -restore -sign /p:PackageRID=osx-x64 /p:AssetManifestOS=osx /p:PlatformName=x64 /p:Publish=false $(_InternalBuildArgs)
                 displayName: Build
               - task: 1ES.PublishPipelineArtifact@1
                 inputs:
                   path: $(System.DefaultWorkingDirectory)/artifacts/packages
-                  artifact: Packages_macOS_x64
+                  artifact: PackageArtifacts
               - bash: |
                   rm -rf binaryen node python llvm emscripten
                 displayName: Remove temporary artifacts
@@ -90,12 +89,11 @@ extends:
               steps:
               - bash: |
                   ./build.sh --arch arm64 --restore --build --pack --ci --configuration $(_BuildConfig) /p:PackageRID=osx-arm64 /p:AssetManifestOS=osx /p:PlatformName=arm64 /p:Publish=false $(_InternalBuildArgs)
-                  pwsh ./eng/common/build.ps1 -ci -configuration $(_BuildConfig) -restore -sign /p:PackageRID=osx-arm64 /p:AssetManifestOS=osx /p:PlatformName=arm64 /p:Publish=false $(_InternalBuildArgs)
                 displayName: Build
               - task: 1ES.PublishPipelineArtifact@1
                 inputs:
                   path: $(System.DefaultWorkingDirectory)/artifacts/packages
-                  artifact: Packages_macOS_arm64
+                  artifact: PackageArtifacts
               - bash: |
                   rm -rf binaryen node python llvm emscripten
                 displayName: Remove temporary artifacts
@@ -113,14 +111,55 @@ extends:
               steps:
               - bash: |
                   ./build.sh --arch x64 --restore --build --pack --ci --configuration $(_BuildConfig) /p:PackageRID=linux-x64 /p:AssetManifestOS=linux /p:PlatformName=x64 /p:Publish=false $(_InternalBuildArgs)
-                  pwsh ./eng/common/build.ps1 -ci -configuration $(_BuildConfig) -restore -sign /p:PackageRID=linux-x64 /p:AssetManifestOS=linux /p:PlatformName=x64 /p:Publish=false $(_InternalBuildArgs)
                 displayName: Build
               - task: 1ES.PublishPipelineArtifact@1
                 inputs:
                   path: $(System.DefaultWorkingDirectory)/artifacts/packages
-                  artifact: Packages_linux_x64
+                  artifact: PackageArtifacts
               - bash: |
                   rm -rf binaryen node python llvm emscripten
                 displayName: Remove temporary artifacts
               - powershell: $(CheckNuGetSizesScript)
                 displayName: Check NuGet sizes
+            
+            ############ Win arm64 BUILD ############
+            - job: Build_Win_arm64
+              displayName: Windows_arm64
+              timeoutInMinutes: 120
+              pool:
+                name: $(DncEngInternalBuildPool)
+                image: $(WindowsImage)
+                os: windows
+              steps:
+              - script: |
+                  .\build.cmd $(archflag) -restore -build -pack -ci -configuration $(_BuildConfig) /p:SkipWorkloads=true /p:PackageRID=win-arm64 /p:AssetManifestOS=win /p:PlatformName=arm64 /p:Publish=false /p:Sign=false /p:workloadPackagesPath=$(Build.SourcesDirectory)\artifacts\packages\$(_BuildConfig)\Shipping $(_InternalBuildArgs)
+                displayName: Build
+              - task: 1ES.PublishPipelineArtifact@1
+                displayName: Publish intermediate artifacts
+                inputs:
+                  path: $(System.DefaultWorkingDirectory)/artifacts/packages
+                  artifact: PackageArtifacts
+              - script: |
+                  rmdir /s /q binaryen node python llvm emscripten
+                displayName: Remove temporary artifacts
+            
+            ############ Win x64 BUILD ############
+            - job: Build_Win_x64
+              displayName: Windows_x64
+              timeoutInMinutes: 120
+              pool:
+                name: $(DncEngInternalBuildPool)
+                image: $(WindowsImage)
+                os: windows
+              steps:
+              - script: |
+                  .\build.cmd $(archflag) -restore -build -pack -ci -configuration $(_BuildConfig) /p:Sign=false /p:Publish=false /p:SkipWorkloads=true /p:PackageRID=win-x64 /p:AssetManifestOS=win /p:PlatformName=x64 /p:workloadPackagesPath=$(Build.SourcesDirectory)\artifacts\packages\$(_BuildConfig)\Shipping $(_InternalBuildArgs)
+                displayName: Build
+              - task: 1ES.PublishPipelineArtifact@1
+                displayName: Publish intermediate artifacts
+                inputs:
+                  path: $(System.DefaultWorkingDirectory)/artifacts/packages
+                  artifact: PackageArtifacts
+              - script: |
+                  rmdir /s /q binaryen node python llvm emscripten
+                displayName: Remove temporary artifacts

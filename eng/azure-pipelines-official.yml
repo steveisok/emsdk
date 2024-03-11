@@ -237,6 +237,74 @@ extends:
                   rmdir /s /q binaryen node python llvm emscripten
                 displayName: Remove temporary artifacts
 
+            ############ COPIED Workloads BUILD ############
+            - job: Build_Workloads
+              displayName: Workloads
+              dependsOn:
+                - Build_Win_x64
+                - Build_Win_arm64
+                - Build_Linux_x64
+                - Build_macOS_x64
+                - Build_macOS_arm64
+              timeoutInMinutes: 120
+              pool:
+                name: $(DncEngInternalBuildPool)
+                image: $(WindowsImage)
+                os: windows
+              steps:
+              - task: DownloadPipelineArtifact@2
+                inputs:
+                  artifact: IntermediateArtifacts
+                  path: 'artifacts/packages'
+                  patterns: |
+                    IntermediateArtifacts/windows/Shipping/*.*
+                    
+              - script: |
+                  .\build.cmd $(archflag) -restore -build -pack -ci -configuration $(_BuildConfig) -sign /p:SkipBuild=true /p:PackageRID=$(assetManifestOS)-$(assetManifestPlatform) /p:AssetManifestFileName=win-workloads.xml /p:AssetManifestOS=$(assetManifestOS) /p:PlatformName=$(assetManifestPlatform) /p:workloadPackagesPath=$(Build.SourcesDirectory)\artifacts\packages\windows\Shipping $(_InternalBuildArgs)
+                displayName: Build and Publish
+              - task: CopyFiles@2
+                displayName: Prepare job-specific intermediate artifacts subdirectory
+                inputs:
+                  SourceFolder: '$(Build.SourcesDirectory)/artifacts/packages/$(_BuildConfig)'
+                  Contents: |
+                    Shipping/**/*
+                    NonShipping/**/*
+                  TargetFolder: '$(Build.StagingDirectory)/IntermediateArtifacts/windows'
+                  CleanTargetFolder: false
+                  Overwrite: true
+              - task: 1ES.PublishPipelineArtifact@1
+                displayName: Publish intermediate artifacts
+                inputs:
+                  pathToPublish: '$(Build.StagingDirectory)/IntermediateArtifacts'
+                  artifactName: IntermediateArtifacts
+                  artifactType: container
+              # Upload packages wrapping msis
+              - task: CopyFiles@2
+                displayName: Prepare job-specific intermediate artifacts subdirectory
+                inputs:
+                  SourceFolder: '$(Build.SourcesDirectory)/artifacts/packages/windows'
+                  Contents: |
+                    Shipping/**/*
+                    NonShipping/**/*
+                  TargetFolder: '$(Build.StagingDirectory)/IntermediateArtifacts/workloads'
+                  CleanTargetFolder: true
+              # Delete wixpdb files before they are uploaded to artifacts
+              - task: DeleteFiles@1
+                displayName: Delete wixpdb's
+                inputs:
+                  SourceFolder: $(Build.SourcesDirectory)/artifacts/workloadPackages
+                  Contents: '*.wixpdb'
+              # Upload artifacts to be used for generating VS components
+              - task: 1ES.PublishPipelineArtifact@1
+                displayName: Publish workload artifacts
+                inputs:
+                  targetPath: $(Build.SourcesDirectory)/artifacts/VSSetup/$(_BuildConfig)/Insertion/
+                  artifactName: 'Workloads'
+                continueOnError: true
+                condition: ne(variables['SkipPublishWorkloads'], 'true')
+              - powershell: $(CheckNuGetSizesScript)
+                displayName: Check NuGet sizes
+
             ############ Workloads BUILD ############
             - job: Build_Workloads
               displayName: Workloads
