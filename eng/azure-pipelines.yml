@@ -141,31 +141,35 @@ extends:
               - script: |
                   rmdir /s /q binaryen node python llvm emscripten
                 displayName: Remove temporary artifacts
-            
-            ############ Signing BUILD ############
-            - job: Sign_Win_x64
-              displayName: Sign_Artifacts
-              dependsOn:
-                - Build_linux_x64
-                - Build_macOS_x64
-                - Build_macOS_arm64
-                - Build_win_x64
-                - Build_win_arm64
-              timeoutInMinutes: 120
-              pool:
-                name: $(DncEngInternalBuildPool)
-                image: $(WindowsImage)
-                os: windows
-              steps:
-              - task: DownloadPipelineArtifact@2
-                inputs:
-                artifact: PackageArtifacts
-                path: 'artifacts/packages'
-              - powershell: |
-                  ./eng/common/build.ps1 -ci -configuration $(_BuildConfig) -restore -sign -publish /p:PackageRID=osx-x64 /p:AssetManifestOS=osx /p:PlatformName=x64 $(_InternalBuildArgs)
-                  ./eng/common/build.ps1 -ci -configuration $(_BuildConfig) -restore -sign -publish /p:PackageRID=osx-arm64 /p:AssetManifestOS=osx /p:PlatformName=arm64 $(_InternalBuildArgs)
-                  ./eng/common/build.ps1 -ci -configuration $(_BuildConfig) -restore -sign -publish /p:PackageRID=linux-x64 /p:AssetManifestOS=linux /p:PlatformName=x64 $(_InternalBuildArgs)
-                  ./eng/common/build.ps1 -ci -configuration $(_BuildConfig) -restore -sign -publish /p:PackageRID=win-x64 /p:AssetManifestOS=win /p:PlatformName=x64 $(_InternalBuildArgs)
-                  ./eng/common/build.ps1 -ci -configuration $(_BuildConfig) -restore -sign -publish /p:PackageRID=win-arm64 /p:AssetManifestOS=win /p:PlatformName=arm64 $(_InternalBuildArgs)
-                displayName: Sign and Publish
+
+        ############ Signing BUILD ############
+        - template: /eng/common/templates-official/jobs/jobs.yml@self
+          parameters:
+            enablePublishUsingPipelines: true
+            enableMicrobuild: true
+            enableSourceBuild: false
+            dependsOn:
+              - Build_linux_x64
+              - Build_macOS_x64
+              - Build_macOS_arm64
+              - Build_win_x64
+              - Build_win_arm64
+            variables:
+              - _BuildConfig: Release
+            pool:
+              name: $(DncEngInternalBuildPool)
+              image: $(WindowsImage)
+              os: windows
+            steps:
+            - task: DownloadPipelineArtifact@2
+              inputs:
+              artifact: PackageArtifacts
+              path: 'artifacts/packages'
+            - powershell: |
+                ./eng/common/build.ps1 -ci -configuration $(_BuildConfig) -restore -sign -publish /p:PackageRID=osx-x64 /p:AssetManifestOS=osx /p:PlatformName=x64 $(_InternalBuildArgs)
+                ./eng/common/build.ps1 -ci -configuration $(_BuildConfig) -restore -sign -publish /p:PackageRID=osx-arm64 /p:AssetManifestOS=osx /p:PlatformName=arm64 $(_InternalBuildArgs)
+                ./eng/common/build.ps1 -ci -configuration $(_BuildConfig) -restore -sign -publish /p:PackageRID=linux-x64 /p:AssetManifestOS=linux /p:PlatformName=x64 $(_InternalBuildArgs)
+                ./eng/common/build.ps1 -ci -configuration $(_BuildConfig) -restore -sign -publish /p:PackageRID=win-x64 /p:AssetManifestOS=win /p:PlatformName=x64 $(_InternalBuildArgs)
+                ./eng/common/build.ps1 -ci -configuration $(_BuildConfig) -restore -sign -publish /p:PackageRID=win-arm64 /p:AssetManifestOS=win /p:PlatformName=arm64 $(_InternalBuildArgs)
+              displayName: Sign and Publish
               
