@@ -93,7 +93,7 @@ extends:
                 displayName: Check NuGet sizes
             
             ############ Linux BUILD ############
-            - job: Build_Linux_x64
+            - job: Build_linux_x64
               displayName: Linux_x64
               timeoutInMinutes: 120
               pool:
@@ -111,7 +111,7 @@ extends:
                 displayName: Check NuGet sizes
             
             ############ Win arm64 BUILD ############
-            - job: Build_Win_arm64
+            - job: Build_win_arm64
               displayName: Windows_arm64
               timeoutInMinutes: 120
               pool:
@@ -120,14 +120,14 @@ extends:
                 os: windows
               steps:
               - script: |
-                  .\build.cmd -arch arm64 -restore -build -sign -publish -pack -ci -configuration $(_BuildConfig) /p:SkipWorkloads=true /p:PackageRID=win-arm64 /p:AssetManifestOS=win /p:PlatformName=arm64 /p:workloadPackagesPath=$(Build.SourcesDirectory)\artifacts\packages\$(_BuildConfig)\Shipping $(_InternalBuildArgs)
+                  .\build.cmd -arch arm64 -restore -build -publish -pack -ci -configuration $(_BuildConfig) /p:SkipWorkloads=true /p:PackageRID=win-arm64 /p:AssetManifestOS=win /p:PlatformName=arm64 /p:workloadPackagesPath=$(Build.SourcesDirectory)\artifacts\packages\$(_BuildConfig)\Shipping $(_InternalBuildArgs)
                 displayName: Build
               - script: |
                   rmdir /s /q binaryen node python llvm emscripten
                 displayName: Remove temporary artifacts
             
             ############ Win x64 BUILD ############
-            - job: Build_Win_x64
+            - job: Build_win_x64
               displayName: Windows_x64
               timeoutInMinutes: 120
               pool:
@@ -136,8 +136,36 @@ extends:
                 os: windows
               steps:
               - script: |
-                  .\build.cmd -arch x64 -restore -build -pack -sign -publish -ci -configuration $(_BuildConfig) /p:SkipWorkloads=true /p:PackageRID=win-x64 /p:AssetManifestOS=win /p:PlatformName=x64 /p:workloadPackagesPath=$(Build.SourcesDirectory)\artifacts\packages\$(_BuildConfig)\Shipping $(_InternalBuildArgs)
+                  .\build.cmd -arch x64 -restore -build -pack -publish -ci -configuration $(_BuildConfig) /p:SkipWorkloads=true /p:PackageRID=win-x64 /p:AssetManifestOS=win /p:PlatformName=x64 /p:workloadPackagesPath=$(Build.SourcesDirectory)\artifacts\packages\$(_BuildConfig)\Shipping $(_InternalBuildArgs)
                 displayName: Build
               - script: |
                   rmdir /s /q binaryen node python llvm emscripten
                 displayName: Remove temporary artifacts
+            
+            ############ Signing BUILD ############
+            - job: Sign_Win_x64
+              displayName: Sign_Artifacts
+              dependsOn:
+                - Build_linux_x64
+                - Build_macOS_x64
+                - Build_macOS_arm64
+                - Build_win_x64
+                - Build_win_arm64
+              timeoutInMinutes: 120
+              pool:
+                name: $(DncEngInternalBuildPool)
+                image: $(WindowsImage)
+                os: windows
+              steps:
+              - task: DownloadPipelineArtifact@2
+                inputs:
+                artifact: PackageArtifacts
+                path: 'artifacts/packages'
+              - powershell: |
+                  ./eng/common/build.ps1 -ci -configuration $(_BuildConfig) -restore -sign -publish /p:PackageRID=osx-x64 /p:AssetManifestOS=osx /p:PlatformName=x64 $(_InternalBuildArgs)
+                  ./eng/common/build.ps1 -ci -configuration $(_BuildConfig) -restore -sign -publish /p:PackageRID=osx-arm64 /p:AssetManifestOS=osx /p:PlatformName=arm64 $(_InternalBuildArgs)
+                  ./eng/common/build.ps1 -ci -configuration $(_BuildConfig) -restore -sign -publish /p:PackageRID=linux-x64 /p:AssetManifestOS=linux /p:PlatformName=x64 $(_InternalBuildArgs)
+                  ./eng/common/build.ps1 -ci -configuration $(_BuildConfig) -restore -sign -publish /p:PackageRID=win-x64 /p:AssetManifestOS=win /p:PlatformName=x64 $(_InternalBuildArgs)
+                  ./eng/common/build.ps1 -ci -configuration $(_BuildConfig) -restore -sign -publish /p:PackageRID=win-arm64 /p:AssetManifestOS=win /p:PlatformName=arm64 $(_InternalBuildArgs)
+                displayName: Sign and Publish
+              
