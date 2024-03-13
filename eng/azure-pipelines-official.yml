@@ -1,10 +1,27 @@
 variables:
+- template: /eng/common-variables.yml@self
+- template: /eng/common/templates-official/variables/pool-providers.yml@self
+- name: Build.Repository.Clean
+  value: true
+- name: _BuildConfig
+  value: Release
 - name: LinuxImage
   value: 1es-ubuntu-2204-pt
 - name: WindowsImage
   value: 1es-windows-2022-pt
 - name: MacImage
   value: macOS-12
+- name: CheckNuGetSizesScript
+  value: >-
+    $nupkgs_large=(Get-ChildItem artifacts/packages/$(_BuildConfig)/Shipping -recurse -include "*.nupkg" | Select-Object Name,Length | Where-Object { $_.Length -gt 250*1MB });
+    if ($nupkgs_large.Length -gt 0) { Write-Error "NuGet size exceeds 250MiB: $($nupkgs_large | Format-Table | Out-String)"; exit 1 }
+
+trigger:
+  batch: true
+  branches:
+    include:
+    - main
+    - release/*
 
 resources:
   repositories:
@@ -273,4 +290,3 @@ extends:
     - template: /eng/common/templates-official/post-build/post-build.yml@self
       parameters:
         publishingInfraVersion: 3
-              

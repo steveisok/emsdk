@@ -1,7 +1,0 @@
-parameters:
-  - name: templateName
-    type: string
-    default: no
-
-extends:
-  template: ${{ parameters.templateName }}
