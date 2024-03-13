@@ -286,7 +286,3 @@ extends:
               condition: ne(variables['SkipPublishWorkloads'], 'true')
             - powershell: $(CheckNuGetSizesScript)
               displayName: Check NuGet sizes
-
-    - template: /eng/common/templates-official/post-build/post-build.yml@self
-      parameters:
-        publishingInfraVersion: 3
