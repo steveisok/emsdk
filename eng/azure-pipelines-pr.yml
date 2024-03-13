@@ -8,19 +8,6 @@ variables:
       $nupkgs_large=(Get-ChildItem artifacts/packages/$(_BuildConfig)/Shipping -recurse -include "*.nupkg" | Select-Object Name,Length | Where-Object { $_.Length -gt 250*1MB });
       if ($nupkgs_large.Length -gt 0) { Write-Error "NuGet size exceeds 250MiB: $($nupkgs_large | Format-Table | Out-String)"; exit 1 }
 
-trigger:
-  batch: true
-  branches:
-    include:
-    - main
-    - release/*
-
-pr:
-  branches:
-    include:
-    - main
-    - release/*
-
 stages:
 - stage: build
   displayName: Build
